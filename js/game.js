@@ -1,9 +1,13 @@
 import { gameState } from "./state.js";
 import { addItem } from "./inventory.js";
-import { renderPlace, renderActions, renderInventory, showMessage } from "./ui.js";
+import { craftInOrder } from "./recipes.js";
+import { renderPlace, renderActions, renderInventory, renderCrafting, showMessage } from "./ui.js";
 
 let maps = {};
 let items = {};
+let recipes = {};
+let selectedRecipeId = "letter_restoration_ink";
+let selectedOrder = [];
 
 async function loadJson(path) {
   const response = await fetch(path);
@@ -13,12 +17,13 @@ async function loadJson(path) {
 
 async function start() {
   try {
-    [maps, items] = await Promise.all([
+    [maps, items, recipes] = await Promise.all([
       loadJson("./data/maps.json"),
-      loadJson("./data/items.json")
+      loadJson("./data/items.json"),
+      loadJson("./data/recipes.json")
     ]);
     renderCurrentPlace();
-    showMessage("마을 광장에 도착했다.");
+    showMessage("마을 광장에 도착했다. 재료를 찾아 글자 복원 잉크를 만들어 보자.");
   } catch (error) {
     console.error(error);
     showMessage(`게임을 시작하지 못했다.\n${error.message}`);
@@ -48,6 +53,51 @@ function investigate(investigation) {
   renderCurrentPlace();
 }
 
+function selectCraftItem(itemId) {
+  const owned = gameState.inventory[itemId] || 0;
+  const alreadySelected = selectedOrder.filter((id) => id === itemId).length;
+  if (alreadySelected >= owned) return;
+
+  const recipe = recipes[selectedRecipeId];
+  if (!recipe || selectedOrder.length >= recipe.ingredients.length) return;
+
+  selectedOrder.push(itemId);
+  renderCraftingPanel();
+}
+
+function resetCrafting() {
+  selectedOrder = [];
+  renderCraftingPanel();
+  showMessage("조합 순서를 비웠다. 재료를 처음부터 다시 골라 보자.");
+}
+
+function tryCraft() {
+  const recipe = recipes[selectedRecipeId];
+  if (!recipe) return;
+
+  const result = craftInOrder(recipe, selectedOrder);
+  showMessage(result.reason);
+
+  if (result.ok) {
+    selectedOrder = [];
+  }
+
+  renderCurrentPlace();
+}
+
+function renderCraftingPanel() {
+  const recipe = recipes[selectedRecipeId];
+  renderCrafting({
+    recipe,
+    items,
+    inventory: gameState.inventory,
+    selectedOrder,
+    onSelect: selectCraftItem,
+    onReset: resetCrafting,
+    onCraft: tryCraft
+  });
+}
+
 function renderCurrentPlace() {
   const place = maps[gameState.location];
   renderPlace(place);
@@ -67,6 +117,7 @@ function renderCurrentPlace() {
 
   renderActions(actions);
   renderInventory(gameState.inventory, items);
+  renderCraftingPanel();
 }
 
 start();
