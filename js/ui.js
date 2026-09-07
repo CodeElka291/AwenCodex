@@ -33,7 +33,7 @@ export function renderInventory(inventory, items) {
 }
 
 export function renderResonancer({ items, inventory, selectedOrder, discoveredResonances, onSelect, onReset, onResonate }) {
-  const root = document.querySelector("#crafting");
+  const root = document.querySelector("#resonancer");
 
   const materialEntries = Object.entries(inventory).filter(([itemId, amount]) => {
     const item = items[itemId];
@@ -50,7 +50,7 @@ export function renderResonancer({ items, inventory, selectedOrder, discoveredRe
         const item = items[itemId];
         const used = selectedCounts[itemId] || 0;
         const disabled = used >= amount;
-        return `<button class="craft-item" data-item="${itemId}" ${disabled ? "disabled" : ""}>${item?.name || itemId} × ${amount}</button>`;
+        return `<button class="resonance-item" data-item="${itemId}" ${disabled ? "disabled" : ""}>${item?.name || itemId} × ${amount}</button>`;
       }).join("")
     : `<span class="muted">공명에 사용할 재료가 없다.</span>`;
 
@@ -61,20 +61,19 @@ export function renderResonancer({ items, inventory, selectedOrder, discoveredRe
   const discoveredCount = Object.keys(discoveredResonances || {}).length;
 
   root.innerHTML = `
-    <p><strong>Resonancer</strong></p>
     <p class="muted">허공의 틈에 재료를 원하는 순서로 넣어 Awen의 관계를 시험한다.</p>
     <div class="void-window">
-      <div class="muted craft-order">${selectedNames}</div>
+      <div class="muted resonance-order">${selectedNames}</div>
     </div>
-    <div class="craft-buttons">${materialButtons}</div>
-    <button id="craft-reset" class="secondary">공허 비우기</button>
-    <button id="craft-submit">공명 시도</button>
+    <div class="resonance-buttons">${materialButtons}</div>
+    <button id="resonance-reset" class="secondary">재료 되돌리기</button>
+    <button id="resonance-submit">공명 시도</button>
     <p class="muted resonance-count">발견한 공명: ${discoveredCount}</p>
   `;
 
   root.querySelectorAll("[data-item]").forEach((button) => {
     button.addEventListener("click", () => onSelect(button.dataset.item));
   });
-  root.querySelector("#craft-reset").addEventListener("click", onReset);
-  root.querySelector("#craft-submit").addEventListener("click", onResonate);
+  root.querySelector("#resonance-reset").addEventListener("click", onReset);
+  root.querySelector("#resonance-submit").addEventListener("click", onResonate);
 }
