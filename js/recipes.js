@@ -1,5 +1,5 @@
-import { gameState } from "./state.js";
-import { addItem, hasItem, removeItem } from "./inventory.js";
+import { gameState } from "./state.js?v=0.3.1";
+import { addItem, hasItem, removeItem } from "./inventory.js?v=0.3.1";
 
 function countItems(itemIds) {
   const counts = {};
@@ -13,7 +13,7 @@ function hasSelectedItems(selectedOrder) {
   return Object.entries(countItems(selectedOrder)).every(([itemId, amount]) => hasItem(itemId, amount));
 }
 
-function matchesRecipe(recipe, selectedOrder) {
+function matchesResonance(recipe, selectedOrder) {
   if (recipe.ingredients.length !== selectedOrder.length) return false;
   return recipe.ingredients.every((itemId, index) => itemId === selectedOrder[index]);
 }
@@ -27,7 +27,7 @@ export function attemptResonance(recipes, selectedOrder) {
     return { ok: false, reason: "선택한 재료 중 일부가 부족하다." };
   }
 
-  const match = Object.entries(recipes).find(([, recipe]) => matchesRecipe(recipe, selectedOrder));
+  const match = Object.entries(recipes).find(([, resonance]) => matchesResonance(resonance, selectedOrder));
 
   if (!match) {
     return {
@@ -36,20 +36,20 @@ export function attemptResonance(recipes, selectedOrder) {
     };
   }
 
-  const [resonanceId, recipe] = match;
+  const [resonanceId, resonance] = match;
 
   for (const itemId of selectedOrder) {
     removeItem(itemId, 1);
   }
 
-  addItem(recipe.result, recipe.amount || 1);
+  addItem(resonance.result, resonance.amount || 1);
   gameState.discoveredResonances[resonanceId] = true;
-  gameState.discovered[`crafted_${recipe.result}`] = true;
+  gameState.discovered[`resonance_${resonance.result}`] = true;
 
   return {
     ok: true,
     resonanceId,
-    recipe,
-    reason: recipe.successText || "서로 다른 Awen이 하나의 관계로 공명했다."
+    resonance,
+    reason: resonance.successText || "서로 다른 Awen이 하나의 관계로 공명했다."
   };
 }
