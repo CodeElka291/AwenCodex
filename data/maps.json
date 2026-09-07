@@ -1,0 +1,36 @@
+{
+  "square": {
+    "name": "마을 광장",
+    "description": "마을 한가운데 자리한 광장이다. 오래된 분수와 글자가 희미해진 표지판이 보인다.",
+    "exits": [
+      { "label": "기록관으로 간다", "to": "archive" },
+      { "label": "약초상으로 간다", "to": "herb_shop" }
+    ],
+    "investigations": []
+  },
+  "archive": {
+    "name": "기록관",
+    "description": "천장 가까이까지 오래된 책장이 이어져 있다. 종이와 잉크 냄새가 조용히 내려앉아 있다.",
+    "exits": [
+      { "label": "광장으로 돌아간다", "to": "square" }
+    ],
+    "investigations": []
+  },
+  "herb_shop": {
+    "name": "약초상",
+    "description": "말린 약초 냄새가 가득하다. 벽과 선반에는 이름 모를 풀과 작은 병들이 빼곡하다.",
+    "exits": [
+      { "label": "광장으로 돌아간다", "to": "square" }
+    ],
+    "investigations": [
+      {
+        "id": "herb_shop_moon_moss",
+        "label": "선반 아래쪽을 조사한다",
+        "text": "낮은 선반 뒤편에서 희미한 은빛이 새어 나온다. 작은 상자 안에 달빛 이끼가 놓여 있다.",
+        "item": "moon_moss",
+        "amount": 1,
+        "takeText": "달빛 이끼를 얻었다."
+      }
+    ]
+  }
+}
