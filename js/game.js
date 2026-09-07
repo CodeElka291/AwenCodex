@@ -1,12 +1,11 @@
 import { gameState } from "./state.js";
 import { addItem } from "./inventory.js";
-import { craftInOrder } from "./recipes.js";
-import { renderPlace, renderActions, renderInventory, renderCrafting, showMessage } from "./ui.js";
+import { attemptResonance } from "./recipes.js";
+import { renderPlace, renderActions, renderInventory, renderResonancer, showMessage } from "./ui.js";
 
 let maps = {};
 let items = {};
 let recipes = {};
-let selectedRecipeId = "letter_restoration_ink";
 let selectedOrder = [];
 
 async function loadJson(path) {
@@ -23,7 +22,7 @@ async function start() {
       loadJson("./data/recipes.json")
     ]);
     renderCurrentPlace();
-    showMessage("마을 광장에 도착했다. 재료를 찾아 글자 복원 잉크를 만들어 보자.");
+    showMessage("마을 광장에 도착했다. 세계의 단서를 읽고, 재료 사이의 관계를 시험해 보자.");
   } catch (error) {
     console.error(error);
     showMessage(`게임을 시작하지 못했다.\n${error.message}`);
@@ -53,29 +52,23 @@ function investigate(investigation) {
   renderCurrentPlace();
 }
 
-function selectCraftItem(itemId) {
+function selectResonanceItem(itemId) {
   const owned = gameState.inventory[itemId] || 0;
   const alreadySelected = selectedOrder.filter((id) => id === itemId).length;
   if (alreadySelected >= owned) return;
 
-  const recipe = recipes[selectedRecipeId];
-  if (!recipe || selectedOrder.length >= recipe.ingredients.length) return;
-
   selectedOrder.push(itemId);
-  renderCraftingPanel();
+  renderResonancerPanel();
 }
 
-function resetCrafting() {
+function resetResonancer() {
   selectedOrder = [];
-  renderCraftingPanel();
-  showMessage("조합 순서를 비웠다. 재료를 처음부터 다시 골라 보자.");
+  renderResonancerPanel();
+  showMessage("공허를 비웠다. 재료들은 다시 손안으로 돌아왔다.");
 }
 
-function tryCraft() {
-  const recipe = recipes[selectedRecipeId];
-  if (!recipe) return;
-
-  const result = craftInOrder(recipe, selectedOrder);
+function tryResonance() {
+  const result = attemptResonance(recipes, selectedOrder);
   showMessage(result.reason);
 
   if (result.ok) {
@@ -85,16 +78,15 @@ function tryCraft() {
   renderCurrentPlace();
 }
 
-function renderCraftingPanel() {
-  const recipe = recipes[selectedRecipeId];
-  renderCrafting({
-    recipe,
+function renderResonancerPanel() {
+  renderResonancer({
     items,
     inventory: gameState.inventory,
     selectedOrder,
-    onSelect: selectCraftItem,
-    onReset: resetCrafting,
-    onCraft: tryCraft
+    discoveredResonances: gameState.discoveredResonances,
+    onSelect: selectResonanceItem,
+    onReset: resetResonancer,
+    onResonate: tryResonance
   });
 }
 
@@ -117,7 +109,7 @@ function renderCurrentPlace() {
 
   renderActions(actions);
   renderInventory(gameState.inventory, items);
-  renderCraftingPanel();
+  renderResonancerPanel();
 }
 
 start();
