@@ -32,35 +32,49 @@ export function renderInventory(inventory, items) {
   }).join("");
 }
 
-export function renderCrafting({ recipe, items, inventory, selectedOrder, onSelect, onReset, onCraft }) {
+export function renderResonancer({ items, inventory, selectedOrder, discoveredResonances, onSelect, onReset, onResonate }) {
   const root = document.querySelector("#crafting");
-  if (!recipe) {
-    root.innerHTML = `<span class="muted">아직 사용할 수 있는 조합법이 없다.</span>`;
-    return;
+
+  const materialEntries = Object.entries(inventory).filter(([itemId, amount]) => {
+    const item = items[itemId];
+    return amount > 0 && item?.type === "material";
+  });
+
+  const selectedCounts = {};
+  for (const itemId of selectedOrder) {
+    selectedCounts[itemId] = (selectedCounts[itemId] || 0) + 1;
   }
 
-  const ingredientButtons = recipe.ingredients.map((itemId) => {
-    const item = items[itemId];
-    const amount = inventory[itemId] || 0;
-    const disabled = amount <= 0 || selectedOrder.length >= recipe.ingredients.length;
-    return `<button class="craft-item" data-item="${itemId}" ${disabled ? "disabled" : ""}>${item?.name || itemId} × ${amount}</button>`;
-  }).join("");
+  const materialButtons = materialEntries.length
+    ? materialEntries.map(([itemId, amount]) => {
+        const item = items[itemId];
+        const used = selectedCounts[itemId] || 0;
+        const disabled = used >= amount;
+        return `<button class="craft-item" data-item="${itemId}" ${disabled ? "disabled" : ""}>${item?.name || itemId} × ${amount}</button>`;
+      }).join("")
+    : `<span class="muted">공명에 사용할 재료가 없다.</span>`;
 
   const selectedNames = selectedOrder.length
     ? selectedOrder.map((id, index) => `${index + 1}. ${items[id]?.name || id}`).join(" → ")
-    : "아직 넣은 재료 없음";
+    : "공허는 비어 있다.";
+
+  const discoveredCount = Object.keys(discoveredResonances || {}).length;
 
   root.innerHTML = `
-    <p><strong>${recipe.name}</strong></p>
-    <div class="muted craft-order">${selectedNames}</div>
-    <div class="craft-buttons">${ingredientButtons}</div>
-    <button id="craft-reset" class="secondary">순서 다시 고르기</button>
-    <button id="craft-submit">이 순서로 조합한다</button>
+    <p><strong>Resonancer</strong></p>
+    <p class="muted">허공의 틈에 재료를 원하는 순서로 넣어 Awen의 관계를 시험한다.</p>
+    <div class="void-window">
+      <div class="muted craft-order">${selectedNames}</div>
+    </div>
+    <div class="craft-buttons">${materialButtons}</div>
+    <button id="craft-reset" class="secondary">공허 비우기</button>
+    <button id="craft-submit">공명 시도</button>
+    <p class="muted resonance-count">발견한 공명: ${discoveredCount}</p>
   `;
 
   root.querySelectorAll("[data-item]").forEach((button) => {
     button.addEventListener("click", () => onSelect(button.dataset.item));
   });
   root.querySelector("#craft-reset").addEventListener("click", onReset);
-  root.querySelector("#craft-submit").addEventListener("click", onCraft);
+  root.querySelector("#craft-submit").addEventListener("click", onResonate);
 }
