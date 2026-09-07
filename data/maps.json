@@ -6,7 +6,16 @@
       { "label": "기록관으로 간다", "to": "archive" },
       { "label": "약초상으로 간다", "to": "herb_shop" }
     ],
-    "investigations": []
+    "investigations": [
+      {
+        "id": "square_dawn_spring",
+        "label": "오래된 분수를 조사한다",
+        "text": "분수 가장자리의 낡은 명판에 희미하게 '새벽샘'이라는 글자가 남아 있다. 물은 차갑고 맑다.",
+        "item": "dawn_spring_water",
+        "amount": 1,
+        "takeText": "빈 병에 새벽 샘물을 담았다."
+      }
+    ]
   },
   "archive": {
     "name": "기록관",
@@ -23,6 +32,14 @@
       { "label": "광장으로 돌아간다", "to": "square" }
     ],
     "investigations": [
+      {
+        "id": "herb_shop_blackwood_sap",
+        "label": "검은 병들을 살펴본다",
+        "text": "선반 한쪽에 거의 빛을 반사하지 않는 작은 병들이 놓여 있다. 라벨에는 '검은나무 수액'이라고 적혀 있다.",
+        "item": "blackwood_sap",
+        "amount": 1,
+        "takeText": "검은나무 수액을 얻었다."
+      },
       {
         "id": "herb_shop_moon_moss",
         "label": "선반 아래쪽을 조사한다",
