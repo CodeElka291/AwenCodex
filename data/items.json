@@ -1,7 +1,22 @@
 {
+  "dawn_spring_water": {
+    "name": "새벽 샘물",
+    "type": "material",
+    "description": "마을의 오래된 새벽샘에서 길어 올린 맑은 물. 글자 복원 잉크의 바탕이 된다."
+  },
+  "blackwood_sap": {
+    "name": "검은나무 수액",
+    "type": "material",
+    "description": "짙고 끈기 있는 검은 수액. 잉크에 글자의 색과 형태를 잡아 준다."
+  },
   "moon_moss": {
     "name": "달빛 이끼",
     "type": "material",
     "description": "달빛을 머금으면 은은하게 빛나는 이끼. 사라진 글자의 흔적에 반응한다고 전해진다."
+  },
+  "letter_restoration_ink": {
+    "name": "글자 복원 잉크",
+    "type": "crafted",
+    "description": "희미해지거나 사라진 글자의 흔적을 되살리는 은빛 잉크."
   }
 }
