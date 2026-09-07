@@ -1,0 +1,13 @@
+{
+  "letter_restoration_ink": {
+    "name": "글자 복원 잉크",
+    "ingredients": [
+      "dawn_spring_water",
+      "blackwood_sap",
+      "moon_moss"
+    ],
+    "result": "letter_restoration_ink",
+    "amount": 1,
+    "successText": "새벽 샘물이 검은 수액을 받아들이고, 마지막으로 달빛 이끼의 은빛이 번져 나간다. 글자 복원 잉크가 완성되었다."
+  }
+}
