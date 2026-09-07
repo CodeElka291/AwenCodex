@@ -1,7 +1,7 @@
-import { gameState } from "./state.js";
-import { addItem } from "./inventory.js";
-import { attemptResonance } from "./recipes.js";
-import { renderPlace, renderActions, renderInventory, renderResonancer, showMessage } from "./ui.js";
+import { gameState } from "./state.js?v=0.3.1";
+import { addItem } from "./inventory.js?v=0.3.1";
+import { attemptResonance } from "./recipes.js?v=0.3.1";
+import { renderPlace, renderActions, renderInventory, renderResonancer, showMessage } from "./ui.js?v=0.3.1";
 
 let maps = {};
 let items = {};
@@ -9,7 +9,7 @@ let recipes = {};
 let selectedOrder = [];
 
 async function loadJson(path) {
-  const response = await fetch(path);
+  const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) throw new Error(`${path} 불러오기 실패`);
   return response.json();
 }
