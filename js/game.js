@@ -5,7 +5,7 @@ import { renderPlace, renderActions, renderResonancer, appendLog } from "./ui.js
 
 let maps = {};
 let items = {};
-let recipes = {};
+let resonances = {};
 let selectedOrder = [];
 
 async function loadJson(path) {
@@ -16,7 +16,7 @@ async function loadJson(path) {
 
 async function start() {
   try {
-    [maps, items, recipes] = await Promise.all([
+    [maps, items, resonances] = await Promise.all([
       loadJson("./data/maps.json"),
       loadJson("./data/items.json"),
       loadJson("./data/recipes.json")
@@ -37,7 +37,7 @@ function moveTo(placeId) {
 }
 
 function investigate(investigation) {
-  appendLog(`> ${investigation.label}`);
+  appendLog(`> ${investigation.label}`, "action");
 
   if (gameState.discovered[investigation.id]) {
     appendLog(`${investigation.text}\n이미 이곳에서 가져갈 것은 챙겼다.`);
@@ -77,13 +77,13 @@ function resetResonancer() {
 
 function tryResonance() {
   appendLog("> 공명을 시도한다.", "action");
-  const result = attemptResonance(recipes, selectedOrder);
+  const result = attemptResonance(resonances, selectedOrder);
 
   appendLog(result.reason, result.ok ? "success" : "failure");
 
   if (result.ok) {
-    const resultName = items[result.recipe.result]?.name || result.recipe.result;
-    appendLog(`✦ ${resultName} × ${result.recipe.amount || 1}을(를) 얻었다.`, "success");
+    const resultName = items[result.resonance.result]?.name || result.resonance.result;
+    appendLog(`✦ ${resultName} × ${result.resonance.amount || 1}을(를) 얻었다.`, "success");
     selectedOrder = [];
   }
 
