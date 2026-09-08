@@ -4,7 +4,8 @@
     "description": "마을 한가운데 자리한 광장이다. 오래된 분수와 글자가 희미해진 표지판이 보인다.",
     "exits": [
       { "label": "기록관으로 간다", "to": "archive" },
-      { "label": "약초상으로 간다", "to": "herb_shop" }
+      { "label": "약초상으로 간다", "to": "herb_shop" },
+      { "label": "숲 가장자리로 간다", "to": "forest_edge" }
     ],
     "investigations": [
       {
@@ -49,5 +50,14 @@
         "takeText": "달빛 이끼를 얻었다."
       }
     ]
+  },
+  "forest_edge": {
+    "name": "숲 가장자리",
+    "description": "마을 담장이 끝나는 곳부터 낮은 숲이 시작된다. 그늘진 땅 사이로 젖은 이끼와 뿌리들이 얽혀 있다.",
+    "exits": [
+      { "label": "광장으로 돌아간다", "to": "square" }
+    ],
+    "investigations": [],
+    "gatheringNodes": ["moon_moss_patch"]
   }
 }
