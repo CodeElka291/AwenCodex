@@ -3,6 +3,8 @@ export const gameState = {
   inventory: {},
   discovered: {},
   discoveredResonances: {},
+  gatheringCooldowns: {},
+  activeGathering: null,
   codexEntries: {},
   quests: {},
   player: { hp: 10 },
