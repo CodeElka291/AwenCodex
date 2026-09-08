@@ -1,4 +1,4 @@
-import { gameState } from "./state.js?v=0.3.2";
+import { gameState } from "./state.js?v=0.4.0";
 
 export function addItem(itemId, amount = 1) {
   gameState.inventory[itemId] = (gameState.inventory[itemId] || 0) + amount;
