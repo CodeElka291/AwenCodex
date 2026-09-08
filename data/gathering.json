@@ -1,0 +1,14 @@
+{
+  "moon_moss_patch": {
+    "action": "달빛 이끼를 찾아본다",
+    "searchText": "숲 바닥의 그늘을 살피는 중…",
+    "duration": 3000,
+    "respawn": 20000,
+    "loot": [
+      { "item": "moon_moss", "weight": 80, "min": 1, "max": 2 },
+      { "item": null, "weight": 20 }
+    ],
+    "successText": "은빛 흔적을 발견했다.",
+    "failureText": "한동안 주변을 살펴보았지만 쓸 만한 이끼는 보이지 않았다."
+  }
+}
