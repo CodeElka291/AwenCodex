@@ -19,9 +19,10 @@ export function renderPlace(place) {
 export function renderActions(actions) {
   const root = document.querySelector("#actions");
   root.innerHTML = "";
-  actions.forEach(({ label, onClick }) => {
+  actions.forEach(({ label, onClick, disabled = false }) => {
     const button = document.createElement("button");
     button.textContent = label;
+    button.disabled = disabled;
     button.addEventListener("click", onClick);
     root.appendChild(button);
   });
