@@ -1,5 +1,5 @@
-import { gameState } from "./state.js?v=0.4.0";
-import { addItem, hasItem, removeItem } from "./inventory.js?v=0.4.0";
+import { gameState } from "./state.js?v=0.4.1";
+import { addItem, hasItem, removeItem } from "./inventory.js?v=0.4.1";
 
 function countItems(itemIds) {
   const counts = {};
