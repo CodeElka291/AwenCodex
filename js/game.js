@@ -1,11 +1,13 @@
-import { gameState } from "./state.js?v=0.3.2";
-import { addItem } from "./inventory.js?v=0.3.2";
-import { attemptResonance } from "./recipes.js?v=0.3.2";
-import { setupTabs, renderPlace, renderActions, renderInventory, renderResonancer, appendLog } from "./ui.js?v=0.3.3";
+import { gameState } from "./state.js?v=0.4.0";
+import { addItem } from "./inventory.js?v=0.4.0";
+import { attemptResonance } from "./recipes.js?v=0.4.0";
+import { canGather, finishGathering, getGatheringCooldownRemaining, isGatheringActive, startGathering } from "./gathering.js?v=0.4.0";
+import { setupTabs, renderPlace, renderActions, renderInventory, renderResonancer, appendLog } from "./ui.js?v=0.4.0";
 
 let maps = {};
 let items = {};
 let resonances = {};
+let gatherings = {};
 let selectedOrder = [];
 
 async function loadJson(path) {
@@ -17,10 +19,11 @@ async function loadJson(path) {
 async function start() {
   try {
     setupTabs();
-    [maps, items, resonances] = await Promise.all([
+    [maps, items, resonances, gatherings] = await Promise.all([
       loadJson("./data/maps.json"),
       loadJson("./data/items.json"),
-      loadJson("./data/recipes.json")
+      loadJson("./data/recipes.json"),
+      loadJson("./data/gathering.json")
     ]);
     renderCurrentPlace();
     appendLog("마을 광장에 도착했다.\n세계의 단서를 읽고, 재료 사이의 관계를 시험해 보자.", "system");
@@ -53,6 +56,31 @@ function investigate(investigation) {
   gameState.discovered[investigation.id] = true;
   appendLog(message);
   renderCurrentPlace();
+}
+
+function gather(nodeId) {
+  const node = gatherings[nodeId];
+  if (!node || !canGather(nodeId) || !startGathering(nodeId)) return;
+
+  appendLog(`> ${node.action}`, "action");
+  appendLog(node.searchText || "주변을 천천히 살펴보는 중…", "muted");
+  renderCurrentPlace();
+
+  window.setTimeout(() => {
+    const result = finishGathering(nodeId, node);
+    if (!result) return;
+
+    if (result.ok) {
+      addItem(result.item, result.amount);
+      const itemName = items[result.item]?.name || result.item;
+      appendLog(`${node.successText || "쓸 만한 재료를 발견했다."}\n${itemName} ×${result.amount}을(를) 얻었다.`, "success");
+    } else {
+      appendLog(node.failureText || "쓸 만한 재료를 찾지 못했다.", "failure");
+    }
+
+    renderCurrentPlace();
+    window.setTimeout(renderCurrentPlace, (node.respawn || 0) + 50);
+  }, node.duration || 0);
 }
 
 function selectResonanceItem(itemId) {
@@ -116,6 +144,24 @@ function renderCurrentPlace() {
       onClick: () => investigate(investigation)
     });
   }
+
+  for (const nodeId of place.gatheringNodes || []) {
+    const node = gatherings[nodeId];
+    if (!node) continue;
+
+    const active = isGatheringActive(nodeId);
+    const cooldown = getGatheringCooldownRemaining(nodeId);
+    actions.push({
+      label: active
+        ? `${node.action} · 찾는 중…`
+        : cooldown > 0
+          ? `${node.action} · 다시 살필 수 없다`
+          : node.action,
+      disabled: active || cooldown > 0,
+      onClick: () => gather(nodeId)
+    });
+  }
+
   for (const exit of place.exits || []) {
     actions.push({ label: exit.label, onClick: () => moveTo(exit.to) });
   }
