@@ -1,5 +1,5 @@
-import { gameState } from "./state.js?v=0.3.1";
-import { addItem, hasItem, removeItem } from "./inventory.js?v=0.3.1";
+import { gameState } from "./state.js?v=0.3.2";
+import { addItem, hasItem, removeItem } from "./inventory.js?v=0.3.2";
 
 function countItems(itemIds) {
   const counts = {};
@@ -13,12 +13,12 @@ function hasSelectedItems(selectedOrder) {
   return Object.entries(countItems(selectedOrder)).every(([itemId, amount]) => hasItem(itemId, amount));
 }
 
-function matchesResonance(recipe, selectedOrder) {
-  if (recipe.ingredients.length !== selectedOrder.length) return false;
-  return recipe.ingredients.every((itemId, index) => itemId === selectedOrder[index]);
+function matchesResonance(resonance, selectedOrder) {
+  if (resonance.ingredients.length !== selectedOrder.length) return false;
+  return resonance.ingredients.every((itemId, index) => itemId === selectedOrder[index]);
 }
 
-export function attemptResonance(recipes, selectedOrder) {
+export function attemptResonance(resonances, selectedOrder) {
   if (!selectedOrder.length) {
     return { ok: false, reason: "공허에 아직 아무것도 넣지 않았다." };
   }
@@ -27,12 +27,12 @@ export function attemptResonance(recipes, selectedOrder) {
     return { ok: false, reason: "선택한 재료 중 일부가 부족하다." };
   }
 
-  const match = Object.entries(recipes).find(([, resonance]) => matchesResonance(resonance, selectedOrder));
+  const match = Object.entries(resonances).find(([, resonance]) => matchesResonance(resonance, selectedOrder));
 
   if (!match) {
     return {
       ok: false,
-      reason: "공허가 잠시 흔들렸지만 공명은 일어나지 않았다. 재료들은 다시 현실로 돌아왔다."
+      reason: "공허가 잠시 흔들렸지만 공명은 일어나지 않았다. 재료에는 변화가 없다."
     };
   }
 
