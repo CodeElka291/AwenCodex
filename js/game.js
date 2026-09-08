@@ -1,7 +1,7 @@
 import { gameState } from "./state.js?v=0.3.2";
 import { addItem } from "./inventory.js?v=0.3.2";
 import { attemptResonance } from "./recipes.js?v=0.3.2";
-import { renderPlace, renderActions, renderResonancer, appendLog } from "./ui.js?v=0.3.2";
+import { setupTabs, renderPlace, renderActions, renderInventory, renderResonancer, appendLog } from "./ui.js?v=0.3.3";
 
 let maps = {};
 let items = {};
@@ -16,6 +16,7 @@ async function loadJson(path) {
 
 async function start() {
   try {
+    setupTabs();
     [maps, items, resonances] = await Promise.all([
       loadJson("./data/maps.json"),
       loadJson("./data/items.json"),
@@ -120,6 +121,7 @@ function renderCurrentPlace() {
   }
 
   renderActions(actions);
+  renderInventory(gameState.inventory, items);
   renderResonancerPanel();
 }
 
