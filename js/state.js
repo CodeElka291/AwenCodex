@@ -5,6 +5,7 @@ export const gameState = {
   discoveredResonances: {},
   gatheringCooldowns: {},
   activeGathering: null,
+  transitionEncounter: null,
   codexEntries: {},
   quests: {},
   player: { hp: 10 },
