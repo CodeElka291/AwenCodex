@@ -1,4 +1,4 @@
-import { gameState } from "./state.js?v=0.4.0";
+import { gameState } from "./state.js?v=0.4.1";
 
 function weightedRoll(entries) {
   const total = entries.reduce((sum, entry) => sum + (entry.weight || 0), 0);
