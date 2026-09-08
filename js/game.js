@@ -1,7 +1,7 @@
-import { gameState } from "./state.js?v=0.4.0";
-import { addItem } from "./inventory.js?v=0.4.0";
-import { attemptResonance } from "./recipes.js?v=0.4.0";
-import { canGather, finishGathering, getGatheringCooldownRemaining, isGatheringActive, startGathering } from "./gathering.js?v=0.4.0";
+import { gameState } from "./state.js?v=0.4.1";
+import { addItem } from "./inventory.js?v=0.4.1";
+import { attemptResonance } from "./recipes.js?v=0.4.1";
+import { canGather, finishGathering, getGatheringCooldownRemaining, isGatheringActive, startGathering } from "./gathering.js?v=0.4.1";
 import { setupTabs, renderPlace, renderActions, renderInventory, renderResonancer, appendLog } from "./ui.js?v=0.4.0";
 
 let maps = {};
@@ -14,6 +14,33 @@ async function loadJson(path) {
   const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) throw new Error(`${path} 불러오기 실패`);
   return response.json();
+}
+
+function weightedChoice(entries) {
+  const total = entries.reduce((sum, entry) => sum + (entry.weight || 0), 0);
+  if (total <= 0) return null;
+
+  let roll = Math.random() * total;
+  for (const entry of entries) {
+    roll -= entry.weight || 0;
+    if (roll < 0) return entry;
+  }
+  return entries[entries.length - 1] || null;
+}
+
+function rollTransitionEncounter(placeId) {
+  const place = maps[placeId];
+  const encounter = weightedChoice(place?.transition?.encounters || []);
+  if (!encounter) return null;
+
+  if (encounter.node && getGatheringCooldownRemaining(encounter.node) > 0) {
+    return {
+      node: null,
+      text: "젖은 돌과 뿌리 사이를 지나지만, 지금은 새로 눈에 띄는 흔적이 없다."
+    };
+  }
+
+  return encounter;
 }
 
 async function start() {
@@ -34,10 +61,20 @@ async function start() {
 }
 
 function moveTo(placeId) {
-  if (!maps[placeId]) return;
+  if (!maps[placeId] || gameState.activeGathering) return;
+
   gameState.location = placeId;
+  const encounter = rollTransitionEncounter(placeId);
+  gameState.transitionEncounter = encounter
+    ? { location: placeId, nodeId: encounter.node || null }
+    : null;
+
   renderCurrentPlace();
   appendLog(`> ${maps[placeId].name}(으)로 이동한다.\n${maps[placeId].name}에 도착했다.`);
+
+  if (encounter?.text) {
+    appendLog(encounter.text, encounter.node ? "system" : "muted");
+  }
 }
 
 function investigate(investigation) {
@@ -78,8 +115,14 @@ function gather(nodeId) {
       appendLog(node.failureText || "쓸 만한 재료를 찾지 못했다.", "failure");
     }
 
+    if (
+      gameState.transitionEncounter?.location === gameState.location &&
+      gameState.transitionEncounter?.nodeId === nodeId
+    ) {
+      gameState.transitionEncounter = null;
+    }
+
     renderCurrentPlace();
-    window.setTimeout(renderCurrentPlace, (node.respawn || 0) + 50);
   }, node.duration || 0);
 }
 
@@ -131,6 +174,23 @@ function renderResonancerPanel() {
   });
 }
 
+function renderGatheringAction(actions, nodeId) {
+  const node = gatherings[nodeId];
+  if (!node) return;
+
+  const active = isGatheringActive(nodeId);
+  const cooldown = getGatheringCooldownRemaining(nodeId);
+  actions.push({
+    label: active
+      ? `${node.action} · 찾는 중…`
+      : cooldown > 0
+        ? `${node.action} · 다시 살필 수 없다`
+        : node.action,
+    disabled: active || cooldown > 0,
+    onClick: () => gather(nodeId)
+  });
+}
+
 function renderCurrentPlace() {
   const place = maps[gameState.location];
   renderPlace(place);
@@ -146,24 +206,22 @@ function renderCurrentPlace() {
   }
 
   for (const nodeId of place.gatheringNodes || []) {
-    const node = gatherings[nodeId];
-    if (!node) continue;
+    renderGatheringAction(actions, nodeId);
+  }
 
-    const active = isGatheringActive(nodeId);
-    const cooldown = getGatheringCooldownRemaining(nodeId);
-    actions.push({
-      label: active
-        ? `${node.action} · 찾는 중…`
-        : cooldown > 0
-          ? `${node.action} · 다시 살필 수 없다`
-          : node.action,
-      disabled: active || cooldown > 0,
-      onClick: () => gather(nodeId)
-    });
+  const transitionNode = gameState.transitionEncounter?.location === gameState.location
+    ? gameState.transitionEncounter.nodeId
+    : null;
+  if (transitionNode) {
+    renderGatheringAction(actions, transitionNode);
   }
 
   for (const exit of place.exits || []) {
-    actions.push({ label: exit.label, onClick: () => moveTo(exit.to) });
+    actions.push({
+      label: exit.label,
+      disabled: Boolean(gameState.activeGathering),
+      onClick: () => moveTo(exit.to)
+    });
   }
 
   renderActions(actions);
