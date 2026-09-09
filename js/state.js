@@ -1,4 +1,6 @@
 export const gameState = {
+  mode: "prologue",
+  prologueScene: "festival_intro",
   location: "square",
   inventory: {},
   discovered: {},
