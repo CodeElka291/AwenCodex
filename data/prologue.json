@@ -1,0 +1,155 @@
+{
+  "festival_intro": {
+    "place": "축제의 광장",
+    "description": "오늘은 아이들의 '끼'를 보는 날이다. 광장에는 천막과 꼬치 냄새와 구경꾼이 가득하다.",
+    "text": "해마다 이맘때면 마법사들이 마을을 찾는다.\n아이들에게 Resonancer용 Key를 쥐여 주고, 허공에 꽂을 수 있는지 보는 날이다.\n\n어른들은 이것을 '끼를 보는 날'이라고 불렀다.\n아이들은 그냥 축제라고 불렀다.",
+    "actions": [
+      { "label": "시험 구경을 한다", "next": "watch_test" },
+      { "label": "일단 먹을 것을 구경한다", "next": "food_stall" }
+    ]
+  },
+  "food_stall": {
+    "place": "축제의 광장",
+    "description": "시험대 옆에서 꼬치가 구워지고 있다. 마법보다 냄새가 훨씬 적극적이다.",
+    "text": "꼬치 하나를 집으려다가 가격표를 보았다.\n\n주머니를 확인했다.\n다시 가격표를 보았다.\n\n마법사가 되는 것보다 꼬치를 사는 쪽이 지금은 더 어려워 보였다.",
+    "actions": [
+      { "label": "얌전히 시험을 구경한다", "next": "watch_test" }
+    ]
+  },
+  "watch_test": {
+    "place": "시험대 앞",
+    "description": "아이들이 한 명씩 나무 단상에 올라 Key를 받아 들고 있다.",
+    "text": "첫 번째 아이가 Key를 힘껏 휘둘렀다.\n\n휙.\n\n아무 일도 없었다.\n\n두 번째 아이도 휘둘렀다.\n휙.\n\nKey가 손에서 빠져 구경하던 아저씨의 모자를 날렸다.\n마법사는 기록판에 무언가를 적었다.\n아마 '모자'는 아니었을 것이다.",
+    "actions": [
+      { "label": "계속 본다", "next": "talented_child" }
+    ]
+  },
+  "talented_child": {
+    "place": "시험대 앞",
+    "description": "이번에는 또래 아이 하나가 단상에 올라섰다.",
+    "text": "아이가 Key를 가볍게 휘둘렀다.\n\n휙.\n턱.\n\nKey가 허공에서 멈췄다.\n아이가 손을 놓았는데도 떨어지지 않았다.\n\n광장이 갑자기 시끄러워졌다.\n\"끼가 있군!\"\n\n아이의 부모가 서로 껴안았다. 정작 아이는 허공에 꽂힌 Key를 어떻게 빼는지 몰라 낑낑거리고 있었다.",
+    "actions": [
+      { "label": "내 차례를 기다린다", "next": "player_turn" }
+    ]
+  },
+  "player_turn": {
+    "place": "시험대",
+    "description": "마침내 이름이 불렸다. 마법사가 Resonancer용 Key 하나를 내민다.",
+    "text": "생각보다 평범하게 생긴 Key다.\n\n마법사가 말했다.\n\"편하게 휘둘러 봐. 세 번이면 충분해.\"",
+    "actions": [
+      { "label": "Key를 휘두른다", "next": "test_one" }
+    ]
+  },
+  "test_one": {
+    "place": "시험대",
+    "description": "수많은 사람이 보고 있다. 별로 도움이 되지는 않는다.",
+    "text": "휙.\n\n아무 일도 일어나지 않았다.",
+    "actions": [
+      { "label": "한 번 더 휘두른다", "next": "test_two" }
+    ]
+  },
+  "test_two": {
+    "place": "시험대",
+    "description": "Key는 아주 성실하게 허공만 가르고 있다.",
+    "text": "휙.\n\n이번에도 아무 일도 없었다.\n\n아까 성공한 아이가 응원하듯 주먹을 쥐어 보였다.\n부담이 두 배가 되었다.",
+    "actions": [
+      { "label": "마지막으로 휘두른다", "next": "test_three" }
+    ]
+  },
+  "test_three": {
+    "place": "시험대",
+    "description": "마지막 한 번이다.",
+    "text": "휙.\n\n완벽하게 아무 일도 일어나지 않았다.\n\n마법사가 Key를 받아 갔다.\n\"됐습니다. 다음 아이!\"\n\n끝이었다.\n놀랄 만큼 깔끔하게 끝이었다.",
+    "actions": [
+      { "label": "집으로 돌아간다", "next": "warehouse" }
+    ]
+  },
+  "warehouse": {
+    "place": "집의 창고",
+    "description": "축제가 끝난 저녁. 창고 문을 닫으려는데 낡은 철제 열쇠가 손에 남았다.",
+    "text": "낮에 휘둘렀던 Key와 크기도 무게도 전혀 다르다.\n당연히 이걸로 될 리가 없다.\n\n그래도 한 번 휘둘러 봤다.",
+    "actions": [
+      { "label": "창고 열쇠를 휘두른다", "next": "practice_start" }
+    ]
+  },
+  "practice_start": {
+    "place": "집의 창고",
+    "description": "낡은 창고 열쇠를 들고 서 있다.",
+    "text": "휙.\n\n아무 일도 없었다.\n\n한 번 더 했다.\n\n휙.\n\n역시 아무 일도 없었다.\n\n이상하게도 한 번만 더 해보고 싶었다.",
+    "actions": [
+      { "label": "그냥, 계속 해본다", "next": "montage_1" }
+    ]
+  },
+  "montage_1": {
+    "place": "연습",
+    "description": "특별한 계획은 없었다. 그냥 생각날 때마다 했다.",
+    "text": "23번째.\n휙.\n\n24번째.\n휙.\n\n25번째.\n휙.\n\n창고의 빗자루가 쓰러졌다.\n잠시 기대했다.\n\n빗자루였다.",
+    "actions": [
+      { "label": "계속한다", "next": "montage_2" }
+    ]
+  },
+  "montage_2": {
+    "place": "연습",
+    "description": "며칠이 지나고, 숫자는 조금씩 커졌다.",
+    "text": "4,821번째.\n휙.\n\n\"뭐 하니?\"\n\"연습.\"\n\"뭘?\"\n\n잠깐 생각했다.\n\"아직 몰라.\"",
+    "actions": [
+      { "label": "그래도 계속한다", "next": "montage_3" }
+    ]
+  },
+  "montage_3": {
+    "place": "연습",
+    "description": "계절이 한 번 바뀌었다. 창고 열쇠의 모서리도 조금 닳았다.",
+    "text": "31,702번째.\n휙.\n\n열쇠가 손에서 빠졌다.\n닭이 맞았다.\n\n그날 이후 닭과의 관계는 이전으로 돌아가지 않았다.",
+    "actions": [
+      { "label": "닭에게서 조금 떨어져 계속한다", "next": "friend_scene" }
+    ]
+  },
+  "friend_scene": {
+    "place": "집 앞",
+    "description": "끼 시험에서 Key를 꽂았던 아이가 지나가다 연습하는 모습을 발견했다.",
+    "text": "\"너 아직도 연습해?\"\n\"응.\"\n\"몇 번 했는데?\"\n\"십이만 정도.\"\n\n친구가 잠시 조용해졌다.\n\"난 세 번 만에 됐는데.\"\n\"응.\"\n\"……미안.\"\n\"왜 네가 미안해?\"\n\"모르겠어. 미안해야 할 것 같아서.\"",
+    "actions": [
+      { "label": "다시 연습한다", "next": "montage_4" }
+    ]
+  },
+  "montage_4": {
+    "place": "연습",
+    "description": "시간은 계속 갔다. 연습도 계속됐다.",
+    "text": "240,991번째.\n휙.\n\n\"여보.\"\n\"응.\"\n\"쟤 아직도 해.\"\n\"보지 마.\"\n\"왜?\"\n\"보면 우리가 먼저 지쳐.\"",
+    "actions": [
+      { "label": "계속한다", "next": "million" }
+    ]
+  },
+  "million": {
+    "place": "집의 창고",
+    "description": "어느새 숫자는 믿기 어려운 곳까지 와 있었다.",
+    "text": "999,998번째.\n휙.\n고양이가 하품했다. 이제 고양이도 관심이 없다.\n\n999,999번째.\n휙.\n아무 일도 없었다.\n\n1,000,000번째.\n휙.\n\n아무 일도 일어나지 않았다.\n\n잠깐 고민했다.\n백만 번이면 뭔가 있을 줄 알았다.",
+    "actions": [
+      { "label": "오늘은 그만한다", "next": "next_day" }
+    ]
+  },
+  "next_day": {
+    "place": "집의 창고",
+    "description": "다음 날. 어제와 똑같은 창고다. 열쇠도 똑같다.",
+    "text": "특별한 기분은 들지 않았다.\n\n그래서 평소처럼 열쇠를 들었다.",
+    "actions": [
+      { "label": "1,000,021번째. 휘두른다", "next": "first_catch" }
+    ]
+  },
+  "first_catch": {
+    "place": "집의 창고",
+    "description": "열쇠를 쥔 손끝에 처음 느껴보는 저항이 걸렸다.",
+    "text": "휙.\n\n턱.\n\n열쇠가 끝까지 움직이지 않았다.\n\n손을 놓았다.\n\n떨어지지 않았다.\n\n열쇠가 허공에 꽂혀 있었다.",
+    "actions": [
+      { "label": "열쇠를 바라본다", "next": "prologue_end" }
+    ]
+  },
+  "prologue_end": {
+    "place": "PROLOGUE · 그냥.",
+    "description": "백만 스물한 번째에 처음으로 일어난 일.",
+    "text": "한참 동안 열쇠를 바라봤다.\n\n\"……되네?\"\n\nPROLOGUE END",
+    "actions": [
+      { "label": "Chapter 1을 시작한다", "end": true }
+    ]
+  }
+}
