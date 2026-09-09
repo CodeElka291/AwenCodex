@@ -10,11 +10,36 @@ let resonances = {};
 let gatherings = {};
 let prologue = {};
 let selectedOrder = [];
+let storyRun = 0;
 
 async function loadJson(path) {
   const response = await fetch(path, { cache: "no-store" });
   if (!response.ok) throw new Error(`${path} 불러오기 실패`);
   return response.json();
+}
+
+function wait(ms) { return new Promise((resolve) => window.setTimeout(resolve, ms)); }
+
+function storyDelay(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return 260;
+  if (trimmed === "……" || trimmed === "..." || trimmed === "…") return 900;
+  if (trimmed === "턱." || trimmed === "턱") return 1300;
+  if (trimmed === "휙." || trimmed === "휙") return 650;
+  if (trimmed.length <= 8) return 650;
+  return 520;
+}
+
+async function playStoryText(text, kind = "normal") {
+  const run = ++storyRun;
+  const lines = String(text || "").split("\n");
+  for (const rawLine of lines) {
+    if (run !== storyRun) return false;
+    if (!rawLine.trim()) { await wait(240); continue; }
+    appendLog(rawLine, kind);
+    await wait(storyDelay(rawLine));
+  }
+  return run === storyRun;
 }
 
 function weightedChoice(entries) {
@@ -32,9 +57,7 @@ function rollTransitionEncounter(placeId) {
   const place = maps[placeId];
   const encounter = weightedChoice(place?.transition?.encounters || []);
   if (!encounter) return null;
-  if (encounter.node && getGatheringCooldownRemaining(encounter.node) > 0) {
-    return { node: null, text: "젖은 돌과 뿌리 사이를 지나지만, 지금은 새로 눈에 띄는 흔적이 없다." };
-  }
+  if (encounter.node && getGatheringCooldownRemaining(encounter.node) > 0) return { node: null, text: "젖은 돌과 뿌리 사이를 지나지만, 지금은 새로 눈에 띄는 흔적이 없다." };
   return encounter;
 }
 
@@ -42,13 +65,9 @@ async function start() {
   try {
     setupTabs();
     [maps, items, resonances, gatherings, prologue] = await Promise.all([
-      loadJson("./data/maps.json"),
-      loadJson("./data/items.json"),
-      loadJson("./data/recipes.json"),
-      loadJson("./data/gathering.json"),
-      loadJson("./data/prologue.json")
+      loadJson("./data/maps.json"), loadJson("./data/items.json"), loadJson("./data/recipes.json"), loadJson("./data/gathering.json"), loadJson("./data/prologue.json")
     ]);
-    if (gameState.mode === "prologue") renderPrologueScene(true);
+    if (gameState.mode === "prologue") renderPrologueScene();
     else renderCurrentPlace();
   } catch (error) {
     console.error(error);
@@ -56,20 +75,20 @@ async function start() {
   }
 }
 
-function renderPrologueScene(first = false) {
+async function renderPrologueScene() {
   const scene = prologue[gameState.prologueScene];
   if (!scene) return;
   renderPlace({ name: scene.place, description: scene.description });
-  if (first || scene.text) appendLog(scene.text, gameState.prologueScene === "first_catch" ? "success" : "normal");
-  renderActions((scene.actions || []).map((action) => ({
-    label: action.label,
-    onClick: () => advancePrologue(action)
-  })));
+  renderActions([]);
   renderInventory(gameState.inventory, items);
   renderResonancerPanel();
+  const finished = await playStoryText(scene.text, gameState.prologueScene === "first_catch" ? "success" : "normal");
+  if (!finished) return;
+  renderActions((scene.actions || []).map((action) => ({ label: action.label, onClick: () => advancePrologue(action) })));
 }
 
 function advancePrologue(action) {
+  storyRun++;
   appendLog(`> ${action.label}`, "action");
   if (action.end) {
     gameState.mode = "world";
@@ -95,15 +114,9 @@ function moveTo(placeId) {
 
 function investigate(investigation) {
   appendLog(`> ${investigation.label}`, "action");
-  if (gameState.discovered[investigation.id]) {
-    appendLog(`${investigation.text}\n이미 이곳에서 가져갈 것은 챙겼다.`);
-    return;
-  }
+  if (gameState.discovered[investigation.id]) { appendLog(`${investigation.text}\n이미 이곳에서 가져갈 것은 챙겼다.`); return; }
   let message = investigation.text;
-  if (investigation.item) {
-    addItem(investigation.item, investigation.amount || 1);
-    message += `\n${investigation.takeText || "아이템을 얻었다."}`;
-  }
+  if (investigation.item) { addItem(investigation.item, investigation.amount || 1); message += `\n${investigation.takeText || "아이템을 얻었다."}`; }
   gameState.discovered[investigation.id] = true;
   appendLog(message);
   renderCurrentPlace();
@@ -165,20 +178,14 @@ function renderGatheringAction(actions, nodeId) {
   if (!node) return;
   const active = isGatheringActive(nodeId);
   const cooldown = getGatheringCooldownRemaining(nodeId);
-  actions.push({
-    label: active ? `${node.action} · 찾는 중…` : cooldown > 0 ? `${node.action} · 다시 살필 수 없다` : node.action,
-    disabled: active || cooldown > 0,
-    onClick: () => gather(nodeId)
-  });
+  actions.push({ label: active ? `${node.action} · 찾는 중…` : cooldown > 0 ? `${node.action} · 다시 살필 수 없다` : node.action, disabled: active || cooldown > 0, onClick: () => gather(nodeId) });
 }
 
 function renderCurrentPlace() {
   const place = maps[gameState.location];
   renderPlace(place);
   const actions = [];
-  for (const investigation of place.investigations || []) {
-    actions.push({ label: gameState.discovered[investigation.id] ? `${investigation.label} ✓` : investigation.label, onClick: () => investigate(investigation) });
-  }
+  for (const investigation of place.investigations || []) actions.push({ label: gameState.discovered[investigation.id] ? `${investigation.label} ✓` : investigation.label, onClick: () => investigate(investigation) });
   for (const nodeId of place.gatheringNodes || []) renderGatheringAction(actions, nodeId);
   const transitionNode = gameState.transitionEncounter?.location === gameState.location ? gameState.transitionEncounter.nodeId : null;
   if (transitionNode) renderGatheringAction(actions, transitionNode);
