@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Awen Codex · 프롤로그 편집기</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#151713;color:#eee8d8;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif}button,input,textarea,select{font:inherit}.app{max-width:980px;margin:auto;padding:16px}.top{display:flex;gap:8px;flex-wrap:wrap;position:sticky;top:0;background:#151713;padding:8px 0 12px;z-index:5}.top button{padding:10px 12px;border:1px solid #555b49;border-radius:10px;background:#2a2e25;color:#f5f0df}.top .primary{background:#3a4033}.grid{display:grid;grid-template-columns:260px 1fr;gap:14px}.sidebar,.editor,.preview{border:1px solid #34382e;border-radius:14px;background:#1b1e18;padding:14px}.scene-list{display:flex;flex-direction:column;gap:6px}.scene-btn{width:100%;text-align:left;padding:9px 10px;border:1px solid #444a3d;border-radius:9px;background:#252920;color:#ddd5c1}.scene-btn.active{background:#34392e;color:#fff4d4}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{margin-bottom:12px}.field label{display:block;font-size:13px;color:#aaa38f;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;border:1px solid #4a5042;border-radius:9px;background:#11130f;color:#f5f0df;padding:10px}.field textarea{min-height:80px;resize:vertical}.line,.action{display:grid;grid-template-columns:1fr 90px auto;gap:8px;align-items:start;margin-bottom:8px}.action{grid-template-columns:1fr 1fr auto}.smallbtn{padding:9px;border:1px solid #4a5042;border-radius:8px;background:#242820;color:#eee}.danger{color:#f0b8b8}.section-title{margin:18px 0 8px;font-weight:700}.hint{font-size:12px;color:#8f8a79;line-height:1.5}.preview{margin-top:14px}.log-line{padding:7px 0;border-bottom:1px solid #292d25;line-height:1.5}.jsonbox{width:100%;min-height:300px;background:#0f110d;color:#e8e0cf;border:1px solid #3e4438;border-radius:10px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}.status{font-size:13px;color:#b9b29f;padding:4px 0}.hidden{display:none}@media(max-width:760px){.grid{grid-template-columns:1fr}.sidebar{order:1}.editor{order:2}.row{grid-template-columns:1fr}.line{grid-template-columns:1fr 82px auto}.action{grid-template-columns:1fr}.top{position:static}}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1 style="font-size:22px;margin:4px 0 6px">Awen Codex · 프롤로그 편집기</h1>
+  <div class="hint">장면과 문장을 편집하고 각 문장 뒤 대기시간을 조절한 뒤 JSON을 복사하거나 파일로 저장할 수 있어요.</div>
+  <div class="top">
+    <button id="loadCurrent">현재 prologue.json 불러오기</button>
+    <button id="addScene">장면 추가</button>
+    <button id="copyJson" class="primary">JSON 복사</button>
+    <button id="downloadJson" class="primary">prologue.json 저장</button>
+    <label class="smallbtn" style="cursor:pointer">JSON 가져오기<input id="fileInput" type="file" accept="application/json,.json" class="hidden"></label>
+  </div>
+  <div class="status" id="status">준비됨</div>
+  <div class="grid">
+    <aside class="sidebar">
+      <div class="section-title" style="margin-top:0">장면</div>
+      <div id="sceneList" class="scene-list"></div>
+    </aside>
+    <main class="editor">
+      <div class="row">
+        <div class="field"><label>장면 ID</label><input id="sceneId"></div>
+        <div class="field"><label>장소 이름</label><input id="place"></div>
+      </div>
+      <div class="field"><label>장소 설명</label><textarea id="description"></textarea></div>
+
+      <div class="section-title">문장 연출</div>
+      <div class="hint">delay는 이 문장이 표시된 뒤 다음 문장까지 기다리는 시간입니다. 1000 = 1초.</div>
+      <div id="lines"></div>
+      <button id="addLine" class="smallbtn">+ 문장 추가</button>
+
+      <div class="section-title">선택지</div>
+      <div id="actions"></div>
+      <button id="addAction" class="smallbtn">+ 선택지 추가</button>
+
+      <div style="margin-top:18px"><button id="deleteScene" class="smallbtn danger">현재 장면 삭제</button></div>
+    </main>
+  </div>
+
+  <section class="preview">
+    <div class="section-title" style="margin-top:0">현재 장면 미리보기</div>
+    <div id="preview"></div>
+  </section>
+
+  <section class="preview">
+    <div class="section-title" style="margin-top:0">생성된 JSON</div>
+    <textarea id="jsonOut" class="jsonbox" readonly></textarea>
+  </section>
+</div>
+<script>
+let data = {};
+let currentId = null;
+const $ = s => document.querySelector(s);
+
+function normalizeScene(scene={}){
+  let lines = scene.lines;
+  if(!Array.isArray(lines)){
+    lines = String(scene.text||"").split("\n").filter((v,i,a)=>v.trim() || (i>0&&i<a.length-1)).map(text=>({text,delay:guessDelay(text)}));
+  }
+  return {
+    place: scene.place || "",
+    description: scene.description || "",
+    lines: lines.map(x=>({text:String(x.text??""),delay:Number(x.delay??guessDelay(String(x.text??"")))})),
+    actions: Array.isArray(scene.actions)?scene.actions.map(a=>({label:a.label||"",next:a.next||"",end:Boolean(a.end)})):[]
+  };
+}
+function guessDelay(line){const t=String(line).trim();if(!t)return 240;if(["……","...","…"].includes(t))return 900;if(t==="턱."||t==="턱")return 1300;if(t==="휙."||t==="휙")return 650;if(t.length<=8)return 650;return 520}
+function setStatus(t){$("#status").textContent=t}
+function ensureCurrent(){if(!currentId){const id="scene_1";data[id]=normalizeScene();currentId=id}}
+function renderAll(){ensureCurrent();renderSceneList();renderEditor();renderJson();}
+function renderSceneList(){const root=$("#sceneList");root.innerHTML="";Object.keys(data).forEach(id=>{const b=document.createElement("button");b.className="scene-btn"+(id===currentId?" active":"");b.textContent=id+(data[id]?.place?` · ${data[id].place}`:"");b.onclick=()=>{saveEditor();currentId=id;renderAll()};root.appendChild(b)})}
+function renderEditor(){const s=normalizeScene(data[currentId]);data[currentId]=s;$("#sceneId").value=currentId;$("#place").value=s.place;$("#description").value=s.description;renderLines();renderActions();renderPreview()}
+function renderLines(){const root=$("#lines");root.innerHTML="";data[currentId].lines.forEach((line,i)=>{const row=document.createElement("div");row.className="line";row.innerHTML=`<textarea data-line-text="${i}" rows="2">${escapeHtml(line.text)}</textarea><input data-line-delay="${i}" type="number" min="0" step="50" value="${line.delay}"><button class="smallbtn danger" data-line-del="${i}">×</button>`;root.appendChild(row)});root.querySelectorAll("[data-line-text]").forEach(el=>el.oninput=saveLive);root.querySelectorAll("[data-line-delay]").forEach(el=>el.oninput=saveLive);root.querySelectorAll("[data-line-del]").forEach(el=>el.onclick=()=>{saveEditor();data[currentId].lines.splice(Number(el.dataset.lineDel),1);renderAll()})}
+function renderActions(){const root=$("#actions");root.innerHTML="";data[currentId].actions.forEach((a,i)=>{const row=document.createElement("div");row.className="action";row.innerHTML=`<input data-action-label="${i}" placeholder="버튼 문구" value="${escapeAttr(a.label)}"><input data-action-next="${i}" placeholder="다음 장면 ID" value="${escapeAttr(a.next||"")}"><label class="smallbtn"><input data-action-end="${i}" type="checkbox" ${a.end?"checked":""}> 끝</label><button class="smallbtn danger" data-action-del="${i}">삭제</button>`;root.appendChild(row)});root.querySelectorAll("input").forEach(el=>el.oninput=saveLive);root.querySelectorAll("[data-action-del]").forEach(el=>el.onclick=()=>{saveEditor();data[currentId].actions.splice(Number(el.dataset.actionDel),1);renderAll()})}
+function saveLive(){saveEditor(false);renderPreview();renderJson();renderSceneList()}
+function saveEditor(allowRename=true){if(!currentId)return;const oldId=currentId;const newId=$("#sceneId").value.trim()||oldId;const s=data[oldId]||normalizeScene();s.place=$("#place").value;s.description=$("#description").value;s.lines=[...document.querySelectorAll("[data-line-text]")].map((el,i)=>({text:el.value,delay:Number(document.querySelector(`[data-line-delay="${i}"]`).value)||0}));s.actions=[...document.querySelectorAll("[data-action-label]")].map((el,i)=>({label:el.value,next:document.querySelector(`[data-action-next="${i}"]`).value.trim(),end:document.querySelector(`[data-action-end="${i}"]`).checked})).map(a=>{if(a.end)delete a.next;else delete a.end;return a});data[oldId]=s;if(allowRename&&newId!==oldId&&!data[newId]){const rebuilt={};Object.keys(data).forEach(k=>rebuilt[k===oldId?newId:k]=data[k]);data=rebuilt;Object.values(data).forEach(sc=>(sc.actions||[]).forEach(a=>{if(a.next===oldId)a.next=newId}));currentId=newId}}
+function exportData(){saveEditor();const out={};Object.entries(data).forEach(([id,s])=>{out[id]={place:s.place,description:s.description,lines:s.lines.map(l=>({text:l.text,delay:Number(l.delay)||0})),actions:(s.actions||[]).map(a=>a.end?{label:a.label,end:true}:{label:a.label,next:a.next})}});return out}
+function renderJson(){try{$("#jsonOut").value=JSON.stringify(exportData(),null,2)}catch(e){}}
+function renderPreview(){const root=$("#preview");root.innerHTML="";const s=data[currentId];(s?.lines||[]).forEach(l=>{const d=document.createElement("div");d.className="log-line";d.textContent=l.text||"(쉼)";root.appendChild(d)});if(s?.actions?.length){const h=document.createElement("div");h.className="section-title";h.textContent="선택";root.appendChild(h);s.actions.forEach(a=>{const b=document.createElement("button");b.className="smallbtn";b.style.display="block";b.style.margin="6px 0";b.textContent=a.label||"(빈 선택지)";root.appendChild(b)})}}
+async function loadCurrent(){try{const r=await fetch("../data/prologue.json",{cache:"no-store"});if(!r.ok)throw new Error("불러오기 실패");const raw=await r.json();data={};Object.entries(raw).forEach(([id,s])=>data[id]=normalizeScene(s));currentId=Object.keys(data)[0]||null;renderAll();setStatus("현재 prologue.json을 불러왔습니다.")}catch(e){setStatus("불러오지 못했습니다: "+e.message)}}
+function escapeHtml(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
+function escapeAttr(s){return escapeHtml(s).replaceAll('"','&quot;')}
+$("#loadCurrent").onclick=loadCurrent;
+$("#addScene").onclick=()=>{saveEditor();let n=1,id;do{id=`scene_${n++}`}while(data[id]);data[id]=normalizeScene();currentId=id;renderAll()};
+$("#addLine").onclick=()=>{saveEditor();data[currentId].lines.push({text:"",delay:520});renderAll()};
+$("#addAction").onclick=()=>{saveEditor();data[currentId].actions.push({label:"",next:""});renderAll()};
+$("#deleteScene").onclick=()=>{if(Object.keys(data).length<=1)return alert("장면은 최소 하나 필요합니다.");if(!confirm(`${currentId} 장면을 삭제할까요?`))return;delete data[currentId];currentId=Object.keys(data)[0];renderAll()};
+$("#copyJson").onclick=async()=>{const text=JSON.stringify(exportData(),null,2);await navigator.clipboard.writeText(text);setStatus("JSON을 클립보드에 복사했습니다.")};
+$("#downloadJson").onclick=()=>{const blob=new Blob([JSON.stringify(exportData(),null,2)],{type:"application/json;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="prologue.json";a.click();URL.revokeObjectURL(a.href);setStatus("prologue.json을 저장했습니다.")};
+$("#fileInput").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const raw=JSON.parse(await f.text());data={};Object.entries(raw).forEach(([id,s])=>data[id]=normalizeScene(s));currentId=Object.keys(data)[0]||null;renderAll();setStatus("JSON 파일을 가져왔습니다.")}catch(err){alert("JSON을 읽지 못했습니다.")}};
+["#sceneId","#place","#description"].forEach(sel=>$(sel).oninput=saveLive);
+loadCurrent();
+</script>
+</body>
+</html>
