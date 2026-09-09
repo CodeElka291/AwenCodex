@@ -15,7 +15,20 @@ let storyRun = 0;
 async function loadJson(path) { const response = await fetch(path, { cache: "no-store" }); if (!response.ok) throw new Error(`${path} 불러오기 실패`); return response.json(); }
 function wait(ms) { return new Promise((resolve) => window.setTimeout(resolve, ms)); }
 function storyDelay(line) { const trimmed = line.trim(); if (!trimmed) return 260; if (trimmed === "……" || trimmed === "..." || trimmed === "…") return 900; if (trimmed === "턱." || trimmed === "턱") return 1300; if (trimmed === "휙." || trimmed === "휙") return 650; if (trimmed.length <= 8) return 650; return 520; }
-async function playStoryText(text, kind = "normal") { const run = ++storyRun; const lines = String(text || "").split("\n"); for (const rawLine of lines) { if (run !== storyRun) return false; if (!rawLine.trim()) { await wait(240); continue; } appendLog(rawLine, kind); await wait(storyDelay(rawLine)); } return run === storyRun; }
+function sceneLines(scene) {
+  if (Array.isArray(scene?.lines)) return scene.lines.map(line => ({ text: String(line?.text ?? ""), delay: Number(line?.delay ?? storyDelay(String(line?.text ?? ""))) }));
+  return String(scene?.text || "").split("\n").map(text => ({ text, delay: storyDelay(text) }));
+}
+async function playStoryScene(scene, kind = "normal") {
+  const run = ++storyRun;
+  for (const line of sceneLines(scene)) {
+    if (run !== storyRun) return false;
+    if (!line.text.trim()) { await wait(line.delay || 240); continue; }
+    appendLog(line.text, kind);
+    await wait(Math.max(0, line.delay));
+  }
+  return run === storyRun;
+}
 function setResonancerVisible(visible) { const tab = document.querySelector("#tab-resonancer"); const tabbar = document.querySelector(".tabbar"); if (tab) tab.classList.toggle("hidden", !visible); if (tabbar) tabbar.classList.toggle("prologue", !visible); }
 function weightedChoice(entries) { const total = entries.reduce((sum, entry) => sum + (entry.weight || 0), 0); if (total <= 0) return null; let roll = Math.random() * total; for (const entry of entries) { roll -= entry.weight || 0; if (roll < 0) return entry; } return entries[entries.length - 1] || null; }
 function rollTransitionEncounter(placeId) { const place = maps[placeId]; const encounter = weightedChoice(place?.transition?.encounters || []); if (!encounter) return null; if (encounter.node && getGatheringCooldownRemaining(encounter.node) > 0) return { node: null, text: "젖은 돌과 뿌리 사이를 지나지만, 지금은 새로 눈에 띄는 흔적이 없다." }; return encounter; }
@@ -32,7 +45,7 @@ async function start() {
 async function renderPrologueScene() {
   const scene = prologue[gameState.prologueScene]; if (!scene) return;
   renderPlace({ name: scene.place, description: scene.description }); renderActions([]); renderInventory(gameState.inventory, items);
-  const finished = await playStoryText(scene.text, gameState.prologueScene === "first_catch" ? "success" : "normal"); if (!finished) return;
+  const finished = await playStoryScene(scene, gameState.prologueScene === "first_catch" ? "success" : "normal"); if (!finished) return;
   renderActions((scene.actions || []).map((action) => ({ label: action.label, onClick: () => advancePrologue(action) })));
 }
 
