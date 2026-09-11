@@ -14,10 +14,15 @@ let storyRun = 0;
 
 async function loadJson(path) { const response = await fetch(path, { cache: "no-store" }); if (!response.ok) throw new Error(`${path} 불러오기 실패`); return response.json(); }
 function wait(ms) { return new Promise((resolve) => window.setTimeout(resolve, ms)); }
-function storyDelay(line) { const trimmed = line.trim(); if (!trimmed) return 260; if (trimmed === "……" || trimmed === "..." || trimmed === "…") return 900; if (trimmed === "턱." || trimmed === "턱") return 1300; if (trimmed === "휙." || trimmed === "휙") return 650; if (trimmed.length <= 8) return 650; return 520; }
+const DEFAULT_LINE_DELAY = 500;
 function sceneLines(scene) {
-  if (Array.isArray(scene?.lines)) return scene.lines.map(line => ({ text: String(line?.text ?? ""), delay: Number(line?.delay ?? storyDelay(String(line?.text ?? ""))) }));
-  return String(scene?.text || "").split("\n").map(text => ({ text, delay: storyDelay(text) }));
+  if (Array.isArray(scene?.lines)) {
+    return scene.lines.map(line => ({
+      text: String(line?.text ?? ""),
+      delay: typeof line?.delay === "number" ? line.delay : DEFAULT_LINE_DELAY
+    }));
+  }
+  return String(scene?.text || "").split("\n").map(text => ({ text, delay: DEFAULT_LINE_DELAY }));
 }
 async function playStoryScene(scene, kind = "normal") {
   const run = ++storyRun;
@@ -36,7 +41,13 @@ function rollTransitionEncounter(placeId) { const place = maps[placeId]; const e
 async function start() {
   try {
     setupTabs();
-    [maps, items, resonances, gatherings, prologue] = await Promise.all([loadJson("./data/maps.json"), loadJson("./data/items.json"), loadJson("./data/recipes.json"), loadJson("./data/gathering.json"), loadJson("./data/prologue.json")]);
+    [maps, items, resonances, gatherings, prologue] = await Promise.all([
+      loadJson("./data/config/maps.json"),
+      loadJson("./data/config/items.json"),
+      loadJson("./data/config/recipes.json"),
+      loadJson("./data/config/gathering.json"),
+      loadJson("./data/story/prologue/prologue.json")
+    ]);
     setResonancerVisible(gameState.mode !== "prologue");
     if (gameState.mode === "prologue") renderPrologueScene(); else renderCurrentPlace();
   } catch (error) { console.error(error); appendLog(`게임을 시작하지 못했다.\n${error.message}`, "error"); }

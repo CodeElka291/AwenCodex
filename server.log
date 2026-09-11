@@ -1,0 +1,15 @@
+::1 - - [11/Sep/2026 11:04:52] "GET /data/prologue.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:23:05] "GET / HTTP/1.1" 304 -
+::1 - - [11/Sep/2026 11:23:05] "GET /js/game.js?v=0.5.1 HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:23:05] "GET /js/state.js?v=0.5.0 HTTP/1.1" 304 -
+::1 - - [11/Sep/2026 11:23:05] "GET /js/recipes.js?v=0.5.0 HTTP/1.1" 304 -
+::1 - - [11/Sep/2026 11:23:05] "GET /js/inventory.js?v=0.5.0 HTTP/1.1" 304 -
+::1 - - [11/Sep/2026 11:23:05] "GET /js/gathering.js?v=0.5.0 HTTP/1.1" 304 -
+::1 - - [11/Sep/2026 11:23:05] "GET /js/ui.js?v=0.4.0 HTTP/1.1" 304 -
+::1 - - [11/Sep/2026 11:23:05] "GET /data/maps.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:23:05] "GET /data/items.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:23:05] "GET /data/recipes.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:23:05] "GET /data/gathering.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:23:05] "GET /data/prologue.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:34:09] "GET /data/config/maps.json HTTP/1.1" 200 -
+::1 - - [11/Sep/2026 11:34:39] "GET /data/story/prologue/prologue.json HTTP/1.1" 200 -
